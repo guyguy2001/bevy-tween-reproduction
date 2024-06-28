@@ -2,14 +2,15 @@ mod utils;
 
 use std::f32::consts::TAU;
 
-use bevy::prelude::*;
+use bevy::{prelude::*, sprite::MaterialMesh2dBundle};
 // use bevy_inspector_egui::quick::ResourceInspectorPlugin;
 use bevy_tween::{
     bevy_time_runner::TimeRunner,
-    interpolate::{scale, sprite_color, translation},
+    interpolate::{scale, translation},
     prelude::*,
     tween::AnimationTarget,
 };
+use interpolate::color_material;
 
 fn main() {
     App::new()
@@ -62,7 +63,11 @@ struct Jeb;
 #[derive(Component)]
 struct JebTranslationAnimator;
 
-fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn setup(
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<ColorMaterial>>,
+) {
     commands.spawn((
         Camera2dBundle {
             ..Default::default()
@@ -73,8 +78,9 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     // Spawning the square
     commands
         .spawn((
-            SpriteBundle {
-                texture: asset_server.load("square_filled.png"),
+            MaterialMesh2dBundle {
+                mesh: meshes.add(Rectangle::new(50., 50.)).into(), // TODO: custom width, full height (TODO: rotations),
+                material: materials.add(Color::WHITE),
                 ..Default::default()
             },
             Jeb,
@@ -151,7 +157,7 @@ fn jeb_follows_cursor(
                         jeb_transform.translation,
                         Vec3::new(coord.x, coord.y, 0.),
                     )),
-                    jeb.with(sprite_color(Color::WHITE, Color::PINK)),
+                    jeb.with(color_material(Color::WHITE, Color::PINK)),
                 ),
             );
     }
